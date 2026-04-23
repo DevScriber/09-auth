@@ -87,6 +87,6 @@ export async function fetchNoteById(
     );
     return response.data;
   } else {
-    throw new Error("Note ID is required for deletion");
+    throw new Error("Note ID is required to fetch the note");
   }
 }

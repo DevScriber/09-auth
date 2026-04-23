@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
-import { checkSession } from '@/lib/api/clientApi';
+import { checkSession, getMe } from '@/lib/api/clientApi';
 
 const privateRoutes = ['/profile', '/notes'];
 
@@ -16,7 +16,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const user = await checkSession();
+                await checkSession();
+                const user = await getMe();
                 if (user) {
                     setUser(user);
                 } else {
