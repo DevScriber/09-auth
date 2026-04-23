@@ -4,11 +4,10 @@ import { Roboto } from "next/font/google";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import TanStackProvider from "../components/TanStackProvider/TanStackProvider";
-
-
+import AuthProvider from "../components/AuthProvider/AuthProvider";
 
 const roboto = Roboto({
-  subsets: ["latin",],
+  subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-roboto",
   display: "swap",
@@ -32,8 +31,6 @@ export const metadata: Metadata = {
   }
 };
 
-
-
 export default function RootLayout({
   children,
   modal,
@@ -45,10 +42,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={roboto.variable}>
         <TanStackProvider>
-          <Header />
-          {children}
-          {modal}
-          <Footer />
+          <AuthProvider>
+            <Header />
+            {children}
+            {modal}
+            <Footer />
+          </AuthProvider>
         </TanStackProvider>
       </body>
     </html>
