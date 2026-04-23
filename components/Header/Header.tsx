@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import css from './Header.module.css'
+import Link from 'next/link';
+import css from './Header.module.css';
 import AuthNavigation from '@/components/AuthNavigation/AuthNavigation';
 
 const Header = () => {
@@ -16,12 +16,11 @@ const Header = () => {
                         </Link>
                     </li>
                     <AuthNavigation />
+
                 </ul>
             </nav>
         </header>
-    )
-}
+    );
+};
 
 export default Header;
-
-

@@ -1,4 +1,4 @@
-import { nextServer } from "./api";
+import { nextServer } from "@/lib/api/api";
 import User from "@/types/user";
 import Note, { Tags } from "@/types/note";
 

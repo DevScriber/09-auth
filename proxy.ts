@@ -1,87 +1,84 @@
-// import { NextResponse } from "next/server";
-// import type { NextRequest } from "next/server";
-
-// const privateRoutes = ["/profile", "/notes"];
-// const authRoutes = ["/sign-in", "/sign-up"];
-
-// export function proxy(request: NextRequest) {
-//   const token = request.cookies.get("token");
-//   const { pathname } = request.nextUrl;
-
-//   const isAuthenticated = Boolean(token);
-
-//   if (
-//     !isAuthenticated &&
-//     privateRoutes.some((route) => pathname.startsWith(route))
-//   ) {
-//     return NextResponse.redirect(new URL("/sign-in", request.url));
-//   }
-
-//   if (
-//     isAuthenticated &&
-//     authRoutes.some((route) => pathname.startsWith(route))
-//   ) {
-//     return NextResponse.redirect(new URL("/profile", request.url));
-//   }
-
-//   return NextResponse.next();
-// }
-
-// export const config = {
-//   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
-// };
-
 import { NextRequest, NextResponse } from "next/server";
-import { checkSession } from "./lib/api/serverApi";
+import { checkSessionServer } from "./lib/api/serverApi";
 
-// Маршруты согласно твоему ТЗ
-const privateRoutes = ["/profile", "/notes"];
-const authRoutes = ["/sign-in", "/sign-up"];
+const privateRoutes = ["/profile", "/notes", "/notes/filter"];
+const publicRoutes = ["/sign-in", "/sign-up"];
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+type CookieOptions = {
+  path?: string;
+  expires?: Date;
+  maxAge?: number;
+};
 
-  // В твоем проекте кука называется "token"
-  const token = request.cookies.get("token")?.value;
-
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
-  const isPrivateRoute = privateRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
-
-  // 1. Если токена нет, но мы пытаемся зайти на приватный роут
-  if (!token && isPrivateRoute) {
-    const signInUrl = new URL("/sign-in", request.url);
-    return NextResponse.redirect(signInUrl);
-  }
-
-  // 2. Если токен есть, проверяем его валидность через сервер (SSR проверка)
-  // Это заменяет сложную логику друга с Refresh-токенами, так как у тебя их нет
-  if (token) {
-    try {
-      // Пытаемся получить сессию на сервере
-      const user = await checkSession();
-
-      // Если мы залогинены и пытаемся зайти на страницы логина/регистрации
-      if (user && isAuthRoute) {
-        return NextResponse.redirect(new URL("/profile", request.url));
+function parseSetCookie(cookieStr: string) {
+  const parts = cookieStr.split(";").map((p) => p.trim());
+  const [nameValue, ...attrs] = parts;
+  const [name, value] = nameValue.split("=");
+  const options: CookieOptions = {};
+  for (const attr of attrs) {
+    const [keyRaw, val] = attr.split("=");
+    const key = keyRaw.toLowerCase();
+    if (key === "path") {
+      options.path = val || "/";
+    }
+    if (key === "expires" && val) {
+      const date = new Date(val);
+      if (!isNaN(date.getTime())) {
+        options.expires = date;
       }
-    } catch  {
-      // Если сервер ответил ошибкой (токен протух), удаляем куку и кидаем на логин
-      if (isPrivateRoute) {
-        const response = NextResponse.redirect(
-          new URL("/sign-in", request.url),
-        );
-        response.cookies.delete("token");
-        return response;
+    }
+    if (key === "max-age" && val) {
+      const maxAge = Number(val);
+      if (!isNaN(maxAge)) {
+        options.maxAge = maxAge;
       }
     }
   }
+  return { name, value, options };
+}
 
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route),
+  );
+  const isPrivateRoute = privateRoutes.some((route) =>
+    pathname.startsWith(route),
+  );
+  if (!accessToken && refreshToken) {
+    const data = await checkSessionServer();
+    const setCookie = data.headers["set-cookie"];
+    if (setCookie) {
+      const cookieArray = Array.isArray(setCookie) ? setCookie : [setCookie];
+      const response = isPublicRoute
+        ? NextResponse.redirect(new URL("/", request.url))
+        : NextResponse.next();
+      for (const cookieStr of cookieArray) {
+        const { name, value, options } = parseSetCookie(cookieStr);
+        if (!name || !value) continue;
+        response.cookies.set(name, value, {
+          path: options.path ?? "/",
+          expires: options.expires,
+          maxAge: options.maxAge,
+        });
+      }
+      return response;
+    }
+  }
+  if (!accessToken) {
+    if (isPrivateRoute) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
+    return NextResponse.next();
+  }
+  if (isPublicRoute) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
   return NextResponse.next();
 }
 
 export const config = {
-  // Маски маршрутов для обработки
-  matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+  matcher: ["/profile/:path*", "/sign-in", "/sign-up", "/notes/:path*"],
 };

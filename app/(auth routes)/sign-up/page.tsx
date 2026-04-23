@@ -2,41 +2,47 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import { register } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
+import { ApiError } from '@/app/api/api';
 import css from './SignUpPage.module.css';
 
-export default function SignUpPage() {
-    const [error, setError] = useState<string | null>(null);
+const SignUpPage = () => {
     const router = useRouter();
-    const setUser = useAuthStore((state) => state.setUser);
+    const [error, setError] = useState('');
 
-    const handleFormAction = async (formData: FormData) => {
-        setError(null);
+    const setUser = useAuthStore(state => state.setUser);
 
+    const handleSubmit = async (formData: FormData) => {
         const email = formData.get('email') as string;
         const password = formData.get('password') as string;
 
-        try {
-            const userData = await register({ email, password });
-            setUser(userData);
-            router.push('/profile');
+        console.log('Email:', email);
+        console.log('Password:', password);
 
-        } catch (err: unknown) {
-            if (axios.isAxiosError(err)) {
-                const serverMessage = err.response?.data?.message;
-                setError(typeof serverMessage === 'string' ? serverMessage : 'Registration failed');
+        try {
+            const res = await register({ email, password });
+
+            console.log('Registration response:', res);
+            if (res) {
+                setUser(res);
+                router.push('/profile');
             } else {
-                setError('An unexpected error occurred');
+                setError('Invalid email or password');
             }
+        } catch (error) {
+            setError(
+                (error as ApiError).response?.data?.error ??
+                (error as ApiError).message ??
+                'Oops... some error'
+            );
         }
     };
 
     return (
-        <main className={css.mainContent}>
+        <section className={css.mainContent}>
             <h1 className={css.formTitle}>Sign up</h1>
-            <form action={handleFormAction} className={css.form}>
+            <form action={handleSubmit} className={css.form}>
                 <div className={css.formGroup}>
                     <label htmlFor="email">Email</label>
                     <input
@@ -67,6 +73,8 @@ export default function SignUpPage() {
 
                 {error && <p className={css.error}>{error}</p>}
             </form>
-        </main>
+        </section>
     );
-}
+};
+
+export default SignUpPage;

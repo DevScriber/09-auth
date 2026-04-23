@@ -1,43 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import axios from 'axios';
-import { useAuthStore } from '@/lib/store/authStore';
-import { updateMe } from '@/lib/api/clientApi';
 import css from './EditProfilePage.module.css';
+import { useRouter } from 'next/navigation';
+import { updateMe } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export default function EditProfilePage() {
     const router = useRouter();
-    const { user, setUser } = useAuthStore();
-    const [error, setError] = useState<string | null>(null);
+
+    const user = useAuthStore(state => state.user);
+    const setUser = useAuthStore(state => state.setUser);
 
     const handleSubmit = async (formData: FormData) => {
-        setError(null);
-        const username = formData.get('username') as string;
+        const newUserName = formData.get('username') as string;
 
-        try {
-            const updatedUser = await updateMe({ username });
-            setUser(updatedUser);
-            router.push('/profile');
-        } catch (err: unknown) {
-            if (axios.isAxiosError(err)) {
-                const serverMessage = err.response?.data?.message;
-                setError(typeof serverMessage === 'string' ? serverMessage : 'Failed to update profile');
-            } else {
-                setError('An unexpected error occurred');
-            }
-        }
+        const updatedUser = await updateMe({
+            username: newUserName,
+        });
+        setUser(updatedUser);
+        router.push('/profile');
     };
 
     const handleCancel = () => {
         router.push('/profile');
     };
-
-    if (!user) return null;
-
-    return (
+    return user ? (
         <main className={css.mainContent}>
             <div className={css.profileCard}>
                 <h1 className={css.formTitle}>Edit Profile</h1>
@@ -59,22 +47,19 @@ export default function EditProfilePage() {
                             type="text"
                             className={css.input}
                             defaultValue={user.username}
-                            required
                         />
                     </div>
 
                     <p>Email: {user.email}</p>
-
-                    {error && <p className={css.error}>{error}</p>}
 
                     <div className={css.actions}>
                         <button type="submit" className={css.saveButton}>
                             Save
                         </button>
                         <button
+                            onClick={handleCancel}
                             type="button"
                             className={css.cancelButton}
-                            onClick={handleCancel}
                         >
                             Cancel
                         </button>
@@ -82,5 +67,7 @@ export default function EditProfilePage() {
                 </form>
             </div>
         </main>
+    ) : (
+        <p>User not found</p>
     );
 }

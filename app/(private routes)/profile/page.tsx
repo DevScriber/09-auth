@@ -2,15 +2,29 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import css from './ProfilePage.module.css';
-import { getMe } from '@/lib/api/serverApi';
+import { getMeServer } from '@/lib/api/serverApi';
 
 export const metadata: Metadata = {
-    title: 'Profile | NoteHub',
-    description: 'View your profile details'
+    title: 'User Profile',
+    description: 'NoteHub - User Profile',
+    openGraph: {
+        title: `User Profile`,
+        description: 'NoteHub - User Profile',
+        siteName: 'NoteHub',
+        images: [
+            {
+                url: 'notehub-og-meta.jpg',
+                width: 1200,
+                height: 630,
+                alt: `NoteHub picture`,
+            },
+        ],
+        type: 'website',
+    },
 };
 
-export default async function Profile() {
-    const user = await getMe();
+const ProfilePage = async () => {
+    const user = await getMeServer();
     return (
         <main className={css.mainContent}>
             <div className={css.profileCard}>
@@ -22,7 +36,7 @@ export default async function Profile() {
                 </div>
                 <div className={css.avatarWrapper}>
                     <Image
-                        src={user?.avatar || '/default-avatar.png'}
+                        src={user?.avatar}
                         alt="User Avatar"
                         width={120}
                         height={120}
@@ -30,14 +44,11 @@ export default async function Profile() {
                     />
                 </div>
                 <div className={css.profileInfo}>
-                    <p>
-                        Username: {user?.username}
-                    </p>
-                    <p>
-                        Email: {user?.email}
-                    </p>
+                    <p>Username: {user?.username}</p>
+                    <p>Email: {user?.email}</p>
                 </div>
             </div>
         </main>
     );
-}
+};
+export default ProfilePage;

@@ -2,39 +2,41 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import { login } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
+import { ApiError } from '@/app/api/api';
 import css from './SignInPage.module.css';
 
-export default function SignInPage() {
-    const [error, setError] = useState<string | null>(null);
+const SignInPage = () => {
     const router = useRouter();
-    const setUser = useAuthStore((state) => state.setUser);
+    const [error, setError] = useState('');
 
-    const handleFormAction = async (formData: FormData) => {
-        setError(null);
+    const setUser = useAuthStore(state => state.setUser);
 
-        const email = formData.get('email') as string;
-        const password = formData.get('password') as string;
-
+    const handleSubmit = async (formData: FormData) => {
         try {
-            const userData = await login({ email, password });
-            setUser(userData);
-            router.push('/profile');
-        } catch (err: unknown) {
-            if (axios.isAxiosError(err)) {
-                const serverMessage = err.response?.data?.message;
-                setError(typeof serverMessage === 'string' ? serverMessage : 'Login failed');
+            const email = formData.get('email') as string;
+            const password = formData.get('password') as string;
+            const res = await login({ email, password });
+
+            if (res) {
+                setUser(res);
+                router.push('/profile');
             } else {
-                setError('An unexpected error occurred');
+                setError('Invalid email or password');
             }
+        } catch (error) {
+            setError(
+                (error as ApiError).response?.data?.error ??
+                (error as ApiError).message ??
+                'Oops... some error'
+            );
         }
     };
 
     return (
         <main className={css.mainContent}>
-            <form action={handleFormAction} className={css.form}>
+            <form action={handleSubmit} className={css.form}>
                 <h1 className={css.formTitle}>Sign in</h1>
 
                 <div className={css.formGroup}>
@@ -64,9 +66,8 @@ export default function SignInPage() {
                         Log in
                     </button>
                 </div>
-
-                {error && <p className={css.error}>{error}</p>}
             </form>
         </main>
     );
-}
+};
+export default SignInPage;
