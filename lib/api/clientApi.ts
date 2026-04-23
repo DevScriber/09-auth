@@ -1,5 +1,5 @@
 import { nextServer } from "@/lib/api/api";
-import User from "@/types/user";
+import { User } from "@/types/user";
 import Note, { Tags } from "@/types/note";
 
 interface FetchNotesResponse {
