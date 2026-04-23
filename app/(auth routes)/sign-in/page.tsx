@@ -4,22 +4,23 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { login } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
 import css from './SignInPage.module.css';
 
 export default function SignInPage() {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const setUser = useAuthStore((state) => state.setUser);
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleFormAction = async (formData: FormData) => {
         setError(null);
 
-        const formData = new FormData(event.currentTarget);
         const email = formData.get('email') as string;
         const password = formData.get('password') as string;
 
         try {
-            await login({ email, password });
+            const userData = await login({ email, password });
+            setUser(userData);
             router.push('/profile');
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
@@ -33,7 +34,7 @@ export default function SignInPage() {
 
     return (
         <main className={css.mainContent}>
-            <form className={css.form} onSubmit={handleSubmit}>
+            <form action={handleFormAction} className={css.form}>
                 <h1 className={css.formTitle}>Sign in</h1>
 
                 <div className={css.formGroup}>

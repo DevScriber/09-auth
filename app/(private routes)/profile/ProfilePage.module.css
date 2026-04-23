@@ -1,75 +1,73 @@
 .mainContent {
     flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 32px;
 }
 
-.profileCard {
-    max-width: 500px;
-    width: 100%;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 400px;
+    margin: 40px auto;
     padding: 24px;
-    text-align: left;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .formTitle {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 24px;
-    text-align: left;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #212529;
 }
 
-.avatarWrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 16px;
-}
-
-.avatar {
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.profileInfo {
-    font-size: 18px;
-    color: #333;
+.formGroup {
     display: flex;
     flex-direction: column;
+    font-size: 14px;
+    font-weight: 500;
+    color: #212529;
+}
+
+.input {
+    margin-top: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
     gap: 8px;
-    align-items: flex-start;
 }
 
-.usernameWrapper {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.editProfileButton {
+.submitButton {
     padding: 8px 16px;
     font-size: 16px;
-    font-weight: 600;
     background-color: #0d6efd;
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s ease;
 }
 
-.editProfileButton:hover {
-    background-color: #0b5ed7;
+.submitButton:hover {
+    background-color: #0d6efd;
+}
+
+.submitButton:disabled {
+    background-color: #b1c7ae;
+    cursor: not-allowed;
+}
+
+.error {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: center;
 }

@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-export const api = axios.create({
-  baseURL: 'https://notehub-api.goit.study',
+export const nextServer = axios.create({
+  baseURL: "https://notehub-api.goit.study",
   withCredentials: true,
 });

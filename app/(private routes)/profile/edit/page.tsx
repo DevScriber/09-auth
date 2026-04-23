@@ -11,12 +11,11 @@ import css from './EditProfilePage.module.css';
 export default function EditProfilePage() {
     const router = useRouter();
     const { user, setUser } = useAuthStore();
-    const [username, setUsername] = useState(user?.username || '');
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleSubmit = async (formData: FormData) => {
         setError(null);
+        const username = formData.get('username') as string;
 
         try {
             const updatedUser = await updateMe({ username });
@@ -49,18 +48,17 @@ export default function EditProfilePage() {
                     width={120}
                     height={120}
                     className={css.avatar}
-                    priority
                 />
 
-                <form className={css.profileInfo} onSubmit={handleSubmit}>
+                <form action={handleSubmit} className={css.profileInfo}>
                     <div className={css.usernameWrapper}>
                         <label htmlFor="username">Username:</label>
                         <input
                             id="username"
+                            name="username"
                             type="text"
                             className={css.input}
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            defaultValue={user.username}
                             required
                         />
                     </div>
