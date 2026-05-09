@@ -2,6 +2,12 @@
 
 import { useEffect, useState, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
+// import { Metadata } from 'next';
+
+// export const metadata: Metadata = {
+//     title: "Authentication | NoteHub",
+//     description: "Log in to your account or create a new one to manage your notes.",
+// };
 
 type Props = {
     children: React.ReactNode;
