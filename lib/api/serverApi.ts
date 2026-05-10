@@ -21,62 +21,46 @@ export const fetchNotes = async ({
   search,
   tag,
 }: FetchNotesProps): Promise<FetchNotesResponse> => {
-  try {
-    const { data } = await nextServer.get<FetchNotesResponse>("/notes", {
-      params: {
-        page,
-        perPage,
-        search,
-        ...(tag && tag !== "all" ? { tag } : {}),
-      },
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-    return data;
-  } catch {
-    throw new Error("Failed to fetch notes");
-  }
+  const { data } = await nextServer.get<FetchNotesResponse>("/notes", {
+    params: {
+      page,
+      perPage,
+      search,
+      ...(tag && tag !== "all" ? { tag } : {}),
+    },
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return data;
 };
 
 export const fetchNoteById = async (noteId: string): Promise<Note> => {
-  try {
-    const cookieStore = await cookies();
-    const response = await nextServer.get<Note>(`/notes/${noteId}`, {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-    return response.data;
-  } catch {
-    throw new Error("Failed to fetch the note");
-  }
+  const cookieStore = await cookies();
+  const response = await nextServer.get<Note>(`/notes/${noteId}`, {
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return response.data;
 };
 
 export const checkSessionServer = async () => {
-  try {
-    const cookieStore = await cookies();
-    const response = await nextServer.get("/auth/session", {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-    return response.data;
-  } catch {
-    throw new Error("Failed to check session");
-  }
+  const cookieStore = await cookies();
+  const response = await nextServer.get("/auth/session", {
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return response.data;
 };
 
 export const getMeServer = async (): Promise<User> => {
-  try {
-    const cookieStore = await cookies();
-    const { data } = await nextServer.get("/users/me", {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-    return data;
-  } catch {
-    throw new Error("Failed to fetch user information");
-  }
+  const cookieStore = await cookies();
+  const { data } = await nextServer.get("/users/me", {
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return data;
 };
