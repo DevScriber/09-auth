@@ -4,24 +4,28 @@ import Image from 'next/image';
 import css from './ProfilePage.module.css';
 import { getMeServer } from '@/lib/api/serverApi';
 
-export const metadata: Metadata = {
-    title: 'User Profile',
-    description: 'NoteHub - User Profile',
-    openGraph: {
-        title: `User Profile`,
-        description: 'NoteHub - User Profile',
-        siteName: 'NoteHub',
-        images: [
-            {
-                url: 'notehub-og-meta.jpg',
-                width: 1200,
-                height: 630,
-                alt: `NoteHub picture`,
-            },
-        ],
-        type: 'website',
-    },
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const user = await getMeServer();
+    return {
+        title: `User: ${user.username}`,
+        description: `Profile page of ${user.username} with email ${user.email}`,
+        openGraph: {
+            title: `User: ${user.username}`,
+            description: `Profile page of ${user.username} with email ${user.email}`,
+            url: `https://notehub.com/profile`,
+            siteName: "NoteHub",
+            images: [
+                {
+                    url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: `${user.username}'s page`,
+                },
+            ],
+            type: "article",
+        },
+    };
+}
 
 const ProfilePage = async () => {
     const user = await getMeServer();

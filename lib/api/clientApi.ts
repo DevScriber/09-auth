@@ -7,20 +7,20 @@ interface FetchNotesResponse {
   totalPages: number;
 }
 
-interface FetchNoteProps {
+interface FetchNotesProps {
   page: number;
   perPage?: number;
   search: string;
   tag?: string;
 }
 
-interface CreateNoteParams {
+interface CreateNoteProps {
   title: string;
   content: string;
   tag: Tags;
 }
 
-interface UserRegisterData {
+interface UserAuthDataProps {
   email: string;
   password: string;
 }
@@ -30,16 +30,20 @@ export const fetchNotes = async ({
   perPage = 12,
   search,
   tag,
-}: FetchNoteProps): Promise<FetchNotesResponse> => {
-  const { data } = await nextServer.get<FetchNotesResponse>("/notes", {
-    params: {
-      page,
-      perPage,
-      search,
-      ...(tag && tag !== "all" ? { tag } : {}),
-    },
-  });
-  return data;
+}: FetchNotesProps): Promise<FetchNotesResponse> => {
+  try {
+    const { data } = await nextServer.get<FetchNotesResponse>("/notes", {
+      params: {
+        page,
+        perPage,
+        search,
+        ...(tag && tag !== "all" ? { tag } : {}),
+      },
+    });
+    return data;
+  } catch {
+    throw new Error("Failed to fetch notes");
+  }
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
@@ -47,7 +51,7 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   return data;
 };
 
-export const createNote = async (newNote: CreateNoteParams): Promise<Note> => {
+export const createNote = async (newNote: CreateNoteProps): Promise<Note> => {
   const { data } = await nextServer.post<Note>("/notes", newNote);
   return data;
 };
@@ -57,13 +61,13 @@ export const deleteNote = async (id: string): Promise<Note> => {
   return data;
 };
 
-export const register = async (user: UserRegisterData): Promise<User> => {
-  const { data } = await nextServer.post<User>("/auth/register", user);
+export const register = async (userData: UserAuthDataProps): Promise<User> => {
+  const { data } = await nextServer.post<User>("/auth/register", userData);
   return data;
 };
 
-export const login = async (user: UserRegisterData): Promise<User> => {
-  const { data } = await nextServer.post<User>("/auth/login", user);
+export const login = async (userData: UserAuthDataProps): Promise<User> => {
+  const { data } = await nextServer.post<User>("/auth/login", userData);
   return data;
 };
 

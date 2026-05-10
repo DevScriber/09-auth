@@ -1,49 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/store/authStore';
-import { checkSession, getMe } from '@/lib/api/clientApi';
+import { checkSession, getMe } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
+import { useEffect } from "react";
 
-const privateRoutes = ['/profile', '/notes'];
+type Props = {
+    children: React.ReactNode;
+};
 
-export default function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [isLoading, setIsLoading] = useState(true);
-    const pathname = usePathname();
-    const router = useRouter();
-    const { setUser, clearIsAuthenticated, isAuthenticated } = useAuthStore();
+const AuthProvider = ({ children }: Props) => {
+    const setUser = useAuthStore((state) => state.setUser);
+    const clearIsAuthenticated = useAuthStore(
+        (state) => state.clearIsAuthenticated,
+    );
 
     useEffect(() => {
-        const initAuth = async () => {
-            try {
-                await checkSession();
+        const fetchUser = async () => {
+            const isAuthenticated = await checkSession();
+            if (isAuthenticated) {
                 const user = await getMe();
-                if (user) {
-                    setUser(user);
-                } else {
-                    clearIsAuthenticated();
-                }
-            } catch {
+                if (user) setUser(user);
+            } else {
                 clearIsAuthenticated();
-            } finally {
-                setIsLoading(false);
             }
         };
-
-        initAuth();
+        fetchUser();
     }, [setUser, clearIsAuthenticated]);
 
-    useEffect(() => {
-        const isPrivateRoute = privateRoutes.some(route => pathname.startsWith(route));
+    return children;
+};
 
-        if (!isLoading && !isAuthenticated && isPrivateRoute) {
-            router.push('/sign-in');
-        }
-    }, [isLoading, isAuthenticated, pathname, router]);
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    return <>{children}</>;
-}
+export default AuthProvider;
