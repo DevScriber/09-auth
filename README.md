@@ -4,7 +4,7 @@ Application for managing personal notes with a robust authentication system. Bui
 
 ## 🚀 Links
 
-- **Live Demo:** [https://09-auth-52u5.vercel.app/](https://09-auth-52u5.vercel.app/)
+- **Live Demo:** [https://notehub-devscriber.vercel.app/](https://notehub-devscriber.vercel.app/)
 - **Backend API Docs:** [NoteHub API Documentation](https://notehub-api.goit.study/docs)
 
 ---
